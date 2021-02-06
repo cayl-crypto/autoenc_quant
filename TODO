@@ -1,0 +1,9 @@
+# Structure of the code.
+
+1. Get intel dataset.
+2. Get clustered dataset.
+3. Preprocess dataset.
+4. Design VAE.
+5. Design batch generator.
+6. Train VAE.
+7. Test VAE.
