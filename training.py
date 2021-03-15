@@ -121,7 +121,6 @@ def train(net, root):
     image_batch_t_o.to(device)
 
     criterion = nn.BCELoss()
-
     optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
     preprocess_i = transforms.Compose([
         transforms.Resize(150),

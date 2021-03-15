@@ -53,30 +53,51 @@ class ConvAutoencoder(nn.Module):
 
         # Encoder
         self.conv1 = nn.Conv2d(3, 16, 3, padding=1)
-        self.conv2 = nn.Conv2d(16, 4, 3, padding=1)
+        self.conv2 = nn.Conv2d(16, 32, 3, padding=1)
+        self.conv3 = nn.Conv2d(32, 64, 3, padding=1)
+        self.conv4 = nn.Conv2d(64, 128, 3, padding=1)
+        self.conv5 = nn.Conv2d(128, 256, 3, padding=1)
         self.pool = nn.MaxPool2d(2, 2)
+        self.output_pool = nn.MaxPool2d(40, 40)
 
         # Decoder
-        self.t_conv1 = nn.ConvTranspose2d(4, 16, 3, stride=2)
-        self.t_conv2 = nn.ConvTranspose2d(16, 3, 2, stride=2)
+        self.t_conv1 = nn.ConvTranspose2d(256, 128, 3, stride=2)
+        self.t_conv2 = nn.ConvTranspose2d(128, 64, 2, stride=2)
+        self.t_conv3 = nn.ConvTranspose2d(64, 32, 2, stride=2)
+        self.t_conv4 = nn.ConvTranspose2d(32, 16, 2, stride=1)
+        self.t_conv5 = nn.ConvTranspose2d(16, 3, 2, stride=1, padding=3)
         self.flat = nn.Flatten()
         # self.up = nn.Upsample(scale_factor=2, mode='nearest')
-
 
     def forward(self, x):
         input_size = x.size()
         # print(input_size)
         x = F.relu(self.conv1(x))
         # print(x.size())
-        x = self.pool(x)
+        # x = self.pool(x)
         # print(x.size())
         x = F.relu(self.conv2(x))
         # print(x.size())
         x = self.pool(x)
         # print(x.size())
-        x = F.relu(self.t_conv1(x))
+        x = F.relu(self.conv3(x))
         # print(x.size())
-        x = torch.sigmoid(self.t_conv2(x, output_size=input_size))
+        x = self.pool(x)
+        # print(x.size())
+        x = F.relu(self.conv4(x))
+        # print(x.size())
+        # x = self.pool(x)
+        # print(x.size())
+        x = F.relu(self.conv5(x))
+        # print(x.size())
+        x = self.pool(x)
+
+        x = F.relu(self.t_conv1(x))
+        x = F.relu(self.t_conv2(x))
+        x = F.relu(self.t_conv3(x))
+        x = F.relu(self.t_conv4(x))
+        # print(x.size())
+        x = torch.sigmoid(self.t_conv5(x, output_size=input_size))
         # print(x.size())
 
         return x
@@ -84,14 +105,26 @@ class ConvAutoencoder(nn.Module):
     def encode(self, x):
         x = F.relu(self.conv1(x))
         # print(x.size())
-        x = self.pool(x)
+        # x = self.pool(x)
         # print(x.size())
         x = F.relu(self.conv2(x))
         # print(x.size())
         x = self.pool(x)
+        # print(x.size())
+        x = F.relu(self.conv3(x))
+        # print(x.size())
         x = self.pool(x)
+        # print(x.size())
+        x = F.relu(self.conv4(x))
+        # print(x.size())
+        # x = self.pool(x)
+        # print(x.size())
+        x = F.relu(self.conv5(x))
+        x = self.output_pool(x)
         x = self.flat(x)
+
         return x
+
 #
 #
 # # Instantiate the model
