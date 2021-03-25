@@ -26,7 +26,7 @@ from utils import *
 # Get dataset paths.
 script_dir = Path().absolute()
 project_dir = script_dir.parent
-roots = ["Resized", "quant_learning/2", "quant_learning/4", "quant_learning/8", "quant_learning/16"]
+roots = ["quant_learning/16", "quant_learning/32", "quant_learning/64", "quant_learning/128"]
 # print(project_dir.joinpath(roots[0]))
 
 # initialize neural networks
@@ -35,15 +35,15 @@ for root in roots:
     nets.append(ConvAutoencoder)
 
 preprocess_input = transforms.Compose([
-    transforms.Resize(160),
-    transforms.CenterCrop(160),
+    transforms.Resize(64),
+    transforms.CenterCrop(64),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 ])
 
 preprocess_output = transforms.Compose([
-    transforms.Resize(160),
-    transforms.CenterCrop(160),
+    transforms.Resize(64),
+    transforms.CenterCrop(64),
     transforms.ToTensor(),
 ])
 
@@ -68,6 +68,7 @@ def train_step(model, input_batch, output, criterion, optimizer):
     loss = criterion(results, output)
     loss.backward()
     optimizer.step()
+    # print(loss.item())
     return loss.item()
     # raise NotImplementedError
 
@@ -81,21 +82,22 @@ def test(model, input_batch, output, criterion):
 
 
 def train(model, dataset_path, epoch, batch_size, model_name):
-    model.to(device)
-    model.cuda()
+    model = model.to(device)
+    # model.cuda()
     train_image_paths = get_image_paths(dataset_path=dataset_path)
     test_image_paths = get_image_paths(dataset_path=dataset_path, train_images=False)
 
-    image_batch_input = torch.zeros(batch_size, 3, 160, 160)
-    image_batch_input = image_batch_input.cuda()
-    image_batch_input.to(device)
+    image_batch_input = torch.zeros(batch_size, 3, 64, 64)
+    image_batch_input = image_batch_input.to(device)
+    # image_batch_input.to(device)
 
-    image_batch_output = torch.zeros(batch_size, 3, 160, 160)
-    image_batch_output = image_batch_output.cuda()
-    image_batch_output.to(device)
+    image_batch_output = torch.zeros(batch_size, 3, 64, 64)
+    image_batch_output = image_batch_output.to(device)
+    # image_batch_output.to(device)
 
-    criterion = nn.BCELoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+    # criterion = nn.BCELoss()
+    criterion = nn.MSELoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.0002)
 
     prev_test_loss = 99999.0
 
@@ -112,12 +114,12 @@ def train(model, dataset_path, epoch, batch_size, model_name):
             image_batch_output[batch_index] = img_output
 
             if batch_index == batch_size - 1:
-                total_train_loss += train_step(model=model, input_batch=image_batch_input, output=image_batch_output,
+                total_train_loss += train_step(model=model, input_batch=image_batch_input, output=image_batch_input,
                                                criterion=criterion, optimizer=optimizer)
 
             if ids == len(train_image_paths) - 1:
                 total_train_loss += train_step(model=model, input_batch=image_batch_input[:batch_index + 1],
-                                               output=image_batch_output[:batch_index + 1],
+                                               output=image_batch_input[:batch_index + 1],
                                                criterion=criterion, optimizer=optimizer)
                 print('train loss: %f' %
                       (total_train_loss / len(train_image_paths)))
@@ -134,11 +136,11 @@ def train(model, dataset_path, epoch, batch_size, model_name):
 
             if batch_index == batch_size - 1:
                 total_test_loss += test(model=model, input_batch=image_batch_input,
-                                        output=image_batch_output, criterion=criterion)
+                                        output=image_batch_input, criterion=criterion)
 
             if ids == len(test_image_paths) - 1:
                 total_test_loss += test(model=model, input_batch=image_batch_input[:batch_index + 1],
-                                        output=image_batch_output[:batch_index + 1],
+                                        output=image_batch_input[:batch_index + 1],
                                         criterion=criterion)
                 print('test loss: %f' %
                       (total_test_loss / len(test_image_paths)))
@@ -148,20 +150,26 @@ def train(model, dataset_path, epoch, batch_size, model_name):
                     prev_test_loss = (total_test_loss / len(test_image_paths))
 
 
-def train_all(dataset_paths, epoch=200, batch_size=200):
+def train_all(dataset_paths, epoch=100, batch_size=2000):
     # Train all the models with corresponding datasets.
 
     # for dataset_path in dataset_paths:
-    # model_resized = ConvAutoencoder()
-    # train(model=model_resized, dataset_path=dataset_path, epoch=epoch, batch_size=batch_size, model_name="original")
-    # model_2 = ConvAutoencoder()
-    # train(model=model_2, dataset_path=dataset_path, epoch=epoch, batch_size=batch_size, model_name="2")
-    # model_4 = ConvAutoencoder()
-    # train(model=model_4, dataset_path=dataset_path, epoch=epoch, batch_size=batch_size, model_name="4")
-    model_8 = ConvAutoencoder()
-    train(model=model_8, dataset_path=dataset_paths[3], epoch=epoch, batch_size=batch_size, model_name="8")
+
+    print("16 Color")
     model_16 = ConvAutoencoder()
-    train(model=model_16, dataset_path=dataset_paths[4], epoch=epoch, batch_size=batch_size, model_name="16")
+    train(model=model_16, dataset_path=dataset_paths[0], epoch=epoch, batch_size=batch_size, model_name="16")
+    print("32 Color")
+    model_32 = ConvAutoencoder()
+    train(model=model_32, dataset_path=dataset_paths[1], epoch=epoch, batch_size=batch_size, model_name="32")
+    print("64 Color")
+    model_64 = ConvAutoencoder()
+    train(model=model_64, dataset_path=dataset_paths[2], epoch=epoch, batch_size=batch_size, model_name="64")
+    print("128 Color")
+    model_128 = ConvAutoencoder()
+    train(model=model_128, dataset_path=dataset_paths[3], epoch=epoch, batch_size=batch_size, model_name="128")
+    # print("16 Color")
+    # model_16 = ConvAutoencoder()
+    # train(model=model_16, dataset_path=dataset_paths[4], epoch=epoch, batch_size=batch_size, model_name="16")
     # raise NotImplementedError
 
 

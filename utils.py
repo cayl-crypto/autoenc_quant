@@ -21,3 +21,6 @@ def show_image(img):
 
 def gray_to_rgb(im):
     return im.convert('RGB')
+
+def resize(im):
+    return im.resize((160, 160))
