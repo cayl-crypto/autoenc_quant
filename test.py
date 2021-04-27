@@ -3,8 +3,8 @@ from autoencoder import ConvAutoencoder
 from utils import *
 
 model_encoder = ConvAutoencoder()
-print(model_encoder)
-model_input = torch.randn(1, 3, 64, 64)
+# print(model_encoder)
+model_input = torch.randn(1, 3, 224, 224)
 from torchvision import datasets, transforms
 
 model_output = model_encoder.forward(model_input)
@@ -16,8 +16,8 @@ print(model_features.shape)
 print()
 
 preprocess_input = transforms.Compose([
-    transforms.Resize(64),
-    transforms.CenterCrop(64),
+    transforms.Resize(224),
+    transforms.CenterCrop(224),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 ])
@@ -30,7 +30,7 @@ import numpy as np
 import cv2
 
 
-def color_quantization(image, K=32):
+def color_quantization(image, K=8):
     image = np.array(image)
     # Defining input data for clustering
     data = np.float32(image).reshape((-1, 3))
@@ -47,6 +47,7 @@ def color_quantization(image, K=32):
 
 def generate_image(model_path, image_path):
     model = torch.load(model_path, map_location=device)
+    # print(model)
     # model = torch.load('best_original.pt')
 
     # image_path = 'test_image.jpg'
@@ -55,7 +56,7 @@ def generate_image(model_path, image_path):
     image = resize(image)
 
     # input_tensor = torch.zeros(1, 3, 64, 64).cuda()
-    input_tensor = torch.zeros(1, 3, 64, 64)
+    input_tensor = torch.zeros(1, 3, 224, 224)
 
     input_tensor[0] = preprocess_input(image)
 
@@ -68,22 +69,22 @@ def generate_image(model_path, image_path):
 
 
 # show_image(generate_image("/home/eva/Desktop/ozkan/Image Caption Generator/autoenc_quant/best_original.pt", "/home/eva/Desktop/ozkan/Image Caption Generator/Resized/val2017/000000000285.jpg"))
-show_image(generate_image("/home/eva/Desktop/ozkan/Image Caption Generator/autoenc_quant/best_original.pt",
-                          "/home/eva/Desktop/ozkan/Image Caption Generator/Resized/train2017/000000000036.jpg"))
+# show_image(generate_image("/home/eva/Desktop/ozkan/Image Caption Generator/autoenc_quant/best_original.pt",
+#                           "/home/eva/Desktop/ozkan/Image Caption Generator/Resized/val2017/000000000285.jpg"))
 # show_image(generate_image("/home/eva/Desktop/ozkan/Image Caption Generator/autoenc_quant/best_16.pt", "/home/eva/Desktop/ozkan/Image Caption Generator/quant_learning/16/val2017/000000000285.jpg"))
-show_image(generate_image("/home/eva/Desktop/ozkan/Image Caption Generator/autoenc_quant/best_2.pt",
-                          "/home/eva/Desktop/ozkan/Image Caption Generator/quant_learning/2/train2017/000000000036.jpg"))
-show_image(generate_image("/home/eva/Desktop/ozkan/Image Caption Generator/autoenc_quant/best_4.pt",
-                          "/home/eva/Desktop/ozkan/Image Caption Generator/quant_learning/4/train2017/000000000036.jpg"))
-show_image(generate_image("/home/eva/Desktop/ozkan/Image Caption Generator/autoenc_quant/best_8.pt",
-                          "/home/eva/Desktop/ozkan/Image Caption Generator/quant_learning/8/train2017/000000000036.jpg"))
-show_image(generate_image("/home/eva/Desktop/ozkan/Image Caption Generator/autoenc_quant/best_16.pt",
-                          "/home/eva/Desktop/ozkan/Image Caption Generator/quant_learning/16/train2017/000000000036.jpg"))
-show_image(generate_image("/home/eva/Desktop/ozkan/Image Caption Generator/autoenc_quant/best_32.pt",
-                          "/home/eva/Desktop/ozkan/Image Caption Generator/quant_learning/32/train2017/000000000036.jpg"))
-show_image(generate_image("/home/eva/Desktop/ozkan/Image Caption Generator/autoenc_quant/best_64.pt",
-                          "/home/eva/Desktop/ozkan/Image Caption Generator/quant_learning/64/train2017/000000000036.jpg"))
-show_image(generate_image("/home/eva/Desktop/ozkan/Image Caption Generator/autoenc_quant/best_128.pt",
-                          "/home/eva/Desktop/ozkan/Image Caption Generator/quant_learning/128/train2017/000000000036.jpg"))
+# show_image(generate_image("/home/eva/Desktop/ozkan/Image Caption Generator/autoenc_quant/best_2.pt",
+#                           "/home/eva/Desktop/ozkan/Image Caption Generator/quant_learning/2/val2017/000000000285.jpg"))
+# show_image(generate_image("/home/eva/Desktop/ozkan/Image Caption Generator/autoenc_quant/best_4.pt",
+#                           "/home/eva/Desktop/ozkan/Image Caption Generator/quant_learning/4/val2017/000000000285.jpg"))
+# show_image(generate_image("/home/eva/Desktop/ozkan/Image Caption Generator/autoenc_quant/best_8.pt",
+#                           "/home/eva/Desktop/ozkan/Image Caption Generator/quant_learning/8/val2017/000000000285.jpg"))
+# show_image(generate_image("/home/eva/Desktop/ozkan/Image Caption Generator/autoenc_quant/best_16.pt",
+#                           "/home/eva/Desktop/ozkan/Image Caption Generator/quant_learning/16/val2017/000000000285.jpg"))
+# show_image(generate_image("/home/eva/Desktop/ozkan/Image Caption Generator/autoenc_quant/best_32.pt",
+#                           "/home/eva/Desktop/ozkan/Image Caption Generator/quant_learning/32/val2017/000000000285.jpg"))
+# show_image(generate_image("/home/eva/Desktop/ozkan/Image Caption Generator/autoenc_quant/best_64.pt",
+#                           "/home/eva/Desktop/ozkan/Image Caption Generator/quant_learning/64/val2017/000000000285.jpg"))
+# show_image(generate_image("/home/eva/Desktop/ozkan/Image Caption Generator/autoenc_quant/best_128.pt",
+#                           "/home/eva/Desktop/ozkan/Image Caption Generator/quant_learning/128/val2017/000000000285.jpg"))
 # show_image(generate_image("/home/eva/Desktop/ozkan/Image Caption Generator/autoenc_quant/best_8.pt",
 # "/home/eva/Desktop/ozkan/Image Caption Generator/quant_learning/8/val2017/000000000776.jpg"))
